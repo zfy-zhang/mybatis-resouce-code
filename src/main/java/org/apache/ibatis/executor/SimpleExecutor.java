@@ -42,11 +42,16 @@ public class SimpleExecutor extends BaseExecutor {
 
   @Override
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
+    // 总算看到点希望了，在JDBC里面所有的SQL都是依赖Statement去输送的
     Statement stmt = null;
     try {
+      // 从前面所传入的mappedStatement中来获取configuration配置对象
       Configuration configuration = ms.getConfiguration();
+      // 通过this（SimpleExecutor）、ms（sql）、parameter（传入的对象）、行绑定等来创建一个StatementHandler对象
       StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
+      // 这里是把所传入的对象的数据和SQL模板进行一个绑定合成一句完整的SQL
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // 最后执行SQL
       return handler.update(stmt);
     } finally {
       closeStatement(stmt);
